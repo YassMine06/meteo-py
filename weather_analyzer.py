@@ -5,7 +5,7 @@ Module pour analyser les données météo et générer des insights
 import pandas as pd
 import numpy as np
 from typing import Dict, List, Any, Tuple
-from config import WEATHER_CODES, ALERT_THRESHOLDS
+from config import WEATHER_CODES
 
 
 class WeatherAnalyzer:
@@ -191,71 +191,7 @@ class WeatherAnalyzer:
         
         return df, stats
     
-    @staticmethod
-    def detect_alerts(
-        current: Dict[str, Any],
-        daily_data: Dict[str, Any],
-        units: str = "metric"
-    ) -> List[Dict[str, str]]:
-        """
-        Détecter les alertes météo
-        
-        Args:
-            current: Données actuelles
-            daily_data: Données quotidiennes
-            units: Système d'unités
-            
-        Returns:
-            Liste d'alertes
-        """
-        alerts = []
-        temp = current.get('temperature_2m', 0)
-        wind = current.get('wind_speed_10m', 0)
-        
-        # Conversion en métrique si nécessaire
-        if units == "imperial":
-            temp = (temp - 32) * 5 / 9
-            wind = wind * 1.60934
-        
-        # Alerte température élevée
-        if temp > ALERT_THRESHOLDS['temp_high']:
-            alerts.append({
-                'type': 'warning',
-                'icon': '🔥',
-                'title': 'Température Élevée',
-                'message': f'Température actuelle: {temp:.1f}°C. Restez hydraté et évitez l\'exposition prolongée au soleil.'
-            })
-        
-        # Alerte température basse
-        if temp < ALERT_THRESHOLDS['temp_low']:
-            alerts.append({
-                'type': 'info',
-                'icon': '❄️',
-                'title': 'Température Basse',
-                'message': f'Température actuelle: {temp:.1f}°C. Habillez-vous chaudement.'
-            })
-        
-        # Alerte vent fort
-        if wind > ALERT_THRESHOLDS['wind_high']:
-            alerts.append({
-                'type': 'warning',
-                'icon': '💨',
-                'title': 'Vent Fort',
-                'message': f'Vitesse du vent: {wind:.1f} km/h. Soyez prudent en extérieur.'
-            })
-        
-        # Alerte précipitations
-        if daily_data:
-            precip_today = daily_data['precipitation_sum'][0]
-            if precip_today > ALERT_THRESHOLDS['precipitation_high']:
-                alerts.append({
-                    'type': 'warning',
-                    'icon': '🌧️',
-                    'title': 'Fortes Précipitations',
-                    'message': f'Précipitations prévues: {precip_today:.1f} mm. Prévoyez un parapluie.'
-                })
-        
-        return alerts
+
     
     @staticmethod
     def get_trend_analysis(df: pd.DataFrame) -> Dict[str, str]:

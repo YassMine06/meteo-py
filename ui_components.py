@@ -3,9 +3,29 @@ Composants UI réutilisables pour l'application météo
 """
 
 import streamlit as st
+import base64
+import os
 from typing import Dict, Any
 from config import THEME_COLORS, WEATHER_GRADIENTS
 from weather_analyzer import WeatherAnalyzer
+
+def get_base64_image(image_path):
+    """Encoder une image en Base64 pour l'intégrer au CSS"""
+    if not image_path or not os.path.exists(image_path):
+        return None
+    try:
+        with open(image_path, "rb") as image_file:
+            encoded_string = base64.b64encode(image_file.read()).decode()
+            return f"data:image/png;base64,{encoded_string}"
+    except Exception:
+        return None
+
+# Mapping weather categories to local image paths for Base64 encoding
+WEATHER_IMAGES = {
+    "sunny": r"C:/Users/yassm/.gemini/antigravity/brain/8c98479e-7c16-4b27-bd5c-25df551512f9/sunny_weather_1767458011348.png",
+    "cloudy": r"C:/Users/yassm/.gemini/antigravity/brain/49df3cff-872b-464b-a51a-ccf08d2d9851/cloudy_weather_bg_stormy_weather_bg_1766842978272.png",
+    "rainy": r"C:/Users/yassm/.gemini/antigravity/brain/49df3cff-872b-464b-a51a-ccf08d2d9851/rainy_weather_bg_1766842963940.png",
+}
 
 
 def inject_custom_css(theme: str = 'premium', weather_category: str = 'sunny'):
@@ -21,6 +41,16 @@ def inject_custom_css(theme: str = 'premium', weather_category: str = 'sunny'):
     colors = THEME_COLORS[theme]
     gradient = WEATHER_GRADIENTS.get(weather_category, WEATHER_GRADIENTS['sunny'])
     
+    # Récupérer l'image en Base64
+    image_path = WEATHER_IMAGES.get(weather_category)
+    base64_image = get_base64_image(image_path) if image_path else None
+    
+    # Construction du style de fond
+    if base64_image:
+        bg_style = f"url('{base64_image}') no-repeat center center fixed"
+    else:
+        bg_style = gradient
+
     st.markdown(f"""
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
@@ -30,9 +60,8 @@ def inject_custom_css(theme: str = 'premium', weather_category: str = 'sunny'):
         }}
 
         .stApp {{
-            background: {gradient};
+            background: {bg_style};
             background-size: cover;
-            background-attachment: fixed;
         }}
 
         /* Overlay principal subtil pour unifier le contraste */
@@ -104,27 +133,42 @@ def inject_custom_css(theme: str = 'premium', weather_category: str = 'sunny'):
         /* Tabs Stylisés */
         .stTabs [data-baseweb="tab-list"] {{
             gap: 20px;
-            background-color: rgba(255, 255, 255, 0.1);
+            background-color: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(40px);
+            -webkit-backdrop-filter: blur(40px);
             padding: 15px;
             border-radius: 50px;
-            border: 1px solid rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.3);
             margin-bottom: 6rem;
             justify-content: center;
         }}
 
         .stTabs [data-baseweb="tab"] {{
-            height: 40px;
+            height: 50px;
+            padding: 0 30px !important;
             background-color: transparent !important;
             border: none !important;
-            color: rgba(255, 255, 255, 0.7) !important;
+            color: rgba(255, 255, 255, 0.8) !important;
             font-weight: 500 !important;
-            border-radius: 20px !important;
+            border-radius: 25px !important;
         }}
 
         .stTabs [aria-selected="true"] {{
-            background-color: rgba(255, 255, 255, 0.25) !important;
+            background-color: rgba(255, 255, 255, 0.4) !important;
             color: white !important;
             font-weight: 600 !important;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }}
+
+        .recommendation-card {{
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border-radius: 15px;
+            padding: 15px;
+            border-left: 5px solid {colors['primary']};
+            margin-bottom: 10px;
+            color: white;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }}
 
@@ -180,12 +224,12 @@ def create_hero_section(city_name: str, temp: float, weather_desc: str, unit: st
 
 def create_metric_card(icon: str, label: str, value: str, extra: str = ""):
     """
-    Créer une carte de métrique glassmorphism
+    Créer une carte de métrique glassmorphism avec hauteur fixe pour alignement parfait
     """
-    extra_html = f"<p style='margin: 5px 0; font-size: 0.85em; opacity: 0.7;'>{extra}</p>" if extra else ""
+    extra_html = f"<p style='margin: 5px 0; font-size: 0.85em; opacity: 0.7;'>{extra}</p>" if extra else "<div style='height:20px;'></div>"
     
     st.markdown(f"""
-    <div class="glass-card" style="margin-bottom: 20px; text-align: center; padding: 1.5rem;">
+    <div class="glass-card" style="height: 180px; display: flex; flex-direction: column; justify-content: center; align-items: center; margin-bottom: 20px; text-align: center; padding: 1rem;">
         <p style="margin:0; opacity:0.8; font-size: 0.9rem; letter-spacing: 1px; text-transform: uppercase;">{icon} {label}</p>
         <h2 style="margin: 10px 0; font-weight: 600;">{value}</h2>
         {extra_html}
@@ -217,18 +261,4 @@ def create_forecast_card(date_str: str, day_str: str, temp_max: float, temp_min:
     """, unsafe_allow_html=True)
 
 
-def create_alert_box(alert: Dict[str, str]):
-    """
-    Créer une boîte d'alerte stylisée
-    """
-    color = "#FF9800" if alert['type'] == 'warning' else "#2196F3"
-    icon = alert['icon']
-    
-    st.markdown(f"""
-    <div class="glass-card" style="border-left: 5px solid {color}; background: rgba(0,0,0,0.2); margin-bottom: 15px; padding: 1.5rem;">
-        <h4 style="margin: 0 0 0.5rem 0; color: {color}; display: flex; align-items: center; gap: 10px;">
-            <span style="font-size: 1.5rem;">{icon}</span> {alert['title']}
-        </h4>
-        <p style="margin: 0; opacity: 0.9; font-size: 1.05rem;">{alert['message']}</p>
-    </div>
-    """, unsafe_allow_html=True)
+

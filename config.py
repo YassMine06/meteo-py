@@ -69,14 +69,7 @@ WEATHER_GRADIENTS = {
     "stormy": "linear-gradient(135deg, #232526 0%, #414345 100%)"  # Dark storm
 }
 
-# Seuils pour les alertes
-ALERT_THRESHOLDS = {
-    "temp_high": 35,  # °C
-    "temp_low": 0,    # °C
-    "wind_high": 50,  # km/h
-    "precipitation_high": 20,  # mm
-    "aqi_poor": 80
-}
+
 
 # Configuration de l'export PDF
 PDF_CONFIG = {

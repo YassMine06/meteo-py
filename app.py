@@ -17,7 +17,7 @@ from weather_analyzer import WeatherAnalyzer
 from session_manager import SessionManager
 from ui_components import (
     inject_custom_css, create_hero_section, create_metric_card,
-    create_forecast_card, create_alert_box
+    create_forecast_card
 )
 from charts import (
     create_temperature_chart, create_precipitation_chart, create_wind_chart,
@@ -144,10 +144,9 @@ def main():
         )
         
         # ONGLETS
-        tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
+        tab1, tab2, tab3, tab4, tab5 = st.tabs([
             "📊 Tableau de Bord",
             "🕒 Prévisions Horaires",
-            "🚨 Alertes",
             "📈 Analyses",
             "📋 Données",
             "💾 Export"
@@ -233,7 +232,7 @@ def main():
                 units
             )
             for rec in recommendations:
-                st.info(rec)
+                st.markdown(f'<div class="recommendation-card">💡 {rec}</div>', unsafe_allow_html=True)
             
             # Prévisions quotidiennes
             st.markdown("<br>", unsafe_allow_html=True)
@@ -274,32 +273,8 @@ def main():
                 })
                 st.dataframe(hourly_df, use_container_width=True, hide_index=True)
         
-        # ==================== TAB 3: ALERTES ====================
+        # ==================== TAB 3: ANALYSES ====================
         with tab3:
-            st.markdown("<h3 style='text-align: center;'>🚨 Alertes Météo</h3>", unsafe_allow_html=True)
-            
-            alerts = analyzer.detect_alerts(current, daily, units)
-            
-            if alerts:
-                st.markdown(f"**{len(alerts)} alerte(s) détectée(s)**")
-                for alert in alerts:
-                    create_alert_box(alert)
-            else:
-                st.success("✅ Aucune alerte météo pour le moment. Conditions normales.")
-            
-            # Tendances
-            st.markdown("<br>", unsafe_allow_html=True)
-            st.markdown("### 📊 Tendances")
-            trends = analyzer.get_trend_analysis(df)
-            
-            col1, col2 = st.columns(2)
-            with col1:
-                st.info(f"**Température:** {trends['temperature']}")
-            with col2:
-                st.info(f"**Précipitations:** {trends['precipitation']}")
-        
-        # ==================== TAB 4: ANALYSES ====================
-        with tab4:
             st.markdown("<h3 style='text-align: center;'>📈 Analyses Détaillées</h3>", unsafe_allow_html=True)
             
             # Statistiques
@@ -335,8 +310,8 @@ def main():
             # Matrice de corrélation
             st.plotly_chart(create_correlation_matrix(df, theme), use_container_width=True)
         
-        # ==================== TAB 5: DONNÉES ====================
-        with tab5:
+        # ==================== TAB 4: DONNÉES ====================
+        with tab4:
             st.markdown("<h3 style='text-align: center;'>📋 Données de la Période</h3>", unsafe_allow_html=True)
             
             df_display = df.copy()
@@ -346,8 +321,8 @@ def main():
             
             st.dataframe(df_display, use_container_width=True, hide_index=True)
         
-        # ==================== TAB 6: EXPORT ====================
-        with tab6:
+        # ==================== TAB 5: EXPORT ====================
+        with tab5:
             st.markdown("<h3 style='text-align: center;'>💾 Exportation des Données</h3>", unsafe_allow_html=True)
             
             col1, col2, col3 = st.columns(3)
@@ -415,12 +390,7 @@ def main():
     
     # Footer
     st.divider()
-    st.markdown("""
-    <div style='text-align: center; opacity: 0.6; padding: 20px;'>
-        🌦️ Météo Pro 2.0 | Données fournies par Open-Meteo API<br>
-        Développé avec ❤️ en Python + Streamlit
-    </div>
-    """, unsafe_allow_html=True)
+
 
 
 if __name__ == "__main__":
