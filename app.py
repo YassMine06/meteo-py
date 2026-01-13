@@ -9,11 +9,14 @@ Version: 2.0
 import streamlit as st
 import pandas as pd
 from datetime import datetime
+import importlib
 
 # Import des modules personnalisés
 from config import PREDEFINED_CITIES
 from weather_api import WeatherAPI
 from weather_analyzer import WeatherAnalyzer
+import weather_analyzer
+importlib.reload(weather_analyzer)
 from session_manager import SessionManager
 from ui_components import (
     inject_custom_css, create_hero_section, create_metric_card,
@@ -43,16 +46,6 @@ def main():
     
     # Récupération du thème
     theme = 'premium'  # Theme unique premium
-    
-    # Déterminer la catégorie météo pour le fond
-    weather_category = 'sunny'
-    if st.session_state.weather_data:
-        code = st.session_state.weather_data['current']['weather_code']
-        analyzer = WeatherAnalyzer()
-        weather_category = analyzer.get_weather_category(code)
-    
-    # Injection du CSS
-    inject_custom_css(theme, weather_category)
     
     # ==================== SIDEBAR ====================
     with st.sidebar:
@@ -84,22 +77,36 @@ def main():
             format_func=lambda x: f"{x} jours"
         )
         
-        rechercher = st.button("🔍 RECHERCHER", type="primary", use_container_width=True)
-        
-        # Historique
         st.divider()
-        history = SessionManager.get_history()
-        if history:
-            st.markdown("### 🕒 Historique")
-            for hist in history[:5]:  # Afficher les 5 derniers
-                if st.button(hist, key=f"hist_{hist}", use_container_width=True):
-                    city_name = hist
-                    rechercher = True
-            
-            if len(history) > 0:
-                if st.button("🗑️ Vider l'historique", use_container_width=True):
-                    SessionManager.clear_history()
-                    st.rerun()
+        
+        # # Mode Test (Debug)
+        # st.markdown("### 🔧 Mode Test")
+        # test_mode = st.checkbox("Activer test visuel", value=False, help="Permet de tester manuellement chaque arrière-plan")
+        # selected_test_category = "sunny_day"
+        # if test_mode:
+        #     from config import WEATHER_GRADIENTS
+        #     selected_test_category = st.selectbox(
+        #         "Choisir un scénario:",
+        #         options=list(WEATHER_GRADIENTS.keys())
+        #     )
+        
+        rechercher = st.button("🔍 RECHERCHER", type="primary", use_container_width=True)
+
+    # Déterminer la catégorie météo pour le fond
+    weather_category = 'sunny_day'
+    if st.session_state.weather_data:
+        current = st.session_state.weather_data['current']
+        code = current['weather_code']
+        is_day = current.get('is_day', 1)
+        analyzer = WeatherAnalyzer()
+        weather_category = analyzer.get_weather_category(code, is_day)
+    
+    # Override weather category if test mode is enabled
+    # if test_mode:
+    #     weather_category = selected_test_category
+    
+    # Injection du CSS
+    inject_custom_css(theme, weather_category)
     
     # ==================== RÉCUPÉRATION DES DONNÉES ====================
     if rechercher or st.session_state.weather_data is None:
@@ -117,8 +124,6 @@ def main():
                     st.session_state.city_info = coords
                     st.session_state.current_units = units
                     
-                    # Ajouter à l'historique
-                    SessionManager.add_to_history(city_name)
                     
                     st.rerun()
     
@@ -140,7 +145,8 @@ def main():
             city_info['name'],
             current['temperature_2m'],
             analyzer.get_weather_description(current['weather_code']),
-            u_temp
+            u_temp,
+            current.get('precipitation', 0.0)
         )
         
         # ONGLETS
@@ -171,7 +177,8 @@ def main():
                 create_metric_card(
                     "💧",
                     "Humidité",
-                    f"{current['relative_humidity_2m']}%"
+                    f"{current['relative_humidity_2m']}%",
+                    f"Pluie: {current.get('precipitation', 0.0)} mm"
                 )
             
             with col3:
@@ -329,7 +336,7 @@ def main():
             
             with col1:
                 st.markdown("<h4 style='text-align: center;'>📄 CSV</h4>", unsafe_allow_html=True)
-                st.write("Tableau de données complet")
+                st.write("<p style='text-align: center;'>Tableau de données complet</p>", unsafe_allow_html=True)
                 
                 csv_data, csv_filename = export_to_csv(df, city_info['name'])
                 st.download_button(
@@ -343,7 +350,7 @@ def main():
             
             with col2:
                 st.markdown("<h4 style='text-align: center;'>📦 JSON</h4>", unsafe_allow_html=True)
-                st.write("Données complètes + stats")
+                st.write("<p style='text-align: center;'>Données complètes + stats</p>", unsafe_allow_html=True)
                 
                 json_data, json_filename = export_to_json(weather_data, city_info, stats)
                 st.download_button(
@@ -357,7 +364,7 @@ def main():
             
             with col3:
                 st.markdown("<h4 style='text-align: center;'>📄 PDF</h4>", unsafe_allow_html=True)
-                st.write("Rapport complet")
+                st.write("<p style='text-align: center;'>Rapport complet</p>", unsafe_allow_html=True)
                 
                 pdf_buffer, result = export_to_pdf(city_info, current, df, stats)
                 

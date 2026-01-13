@@ -97,17 +97,26 @@ class WeatherAnalyzer:
         return WEATHER_CODES.get(code, {"desc": "🌡️ Conditions variables"})["desc"]
     
     @staticmethod
-    def get_weather_category(code: int) -> str:
+    def get_weather_category(code: int, is_day: int = 1) -> str:
         """
-        Obtenir la catégorie météo
+        Obtenir la catégorie météo détaillée
         
         Args:
             code: Code météo Open-Meteo
+            is_day: 1 pour le jour, 0 pour la nuit
             
         Returns:
-            Catégorie (sunny, cloudy, rainy, snowy, stormy)
+            Catégorie détaillée (ex: sunny_day, clear_night, rainy_night)
         """
-        return WEATHER_CODES.get(code, {"category": "cloudy"})["category"]
+        category = WEATHER_CODES.get(code, {"category": "cloudy"})["category"]
+        
+        if is_day == 1:
+            return f"{category}_day"
+        else:
+            # Pour la nuit, sunny devient clear
+            if category == "sunny":
+                return "clear_night"
+            return f"{category}_night"
     
     @staticmethod
     def get_recommendations(temp: float, code: int, units: str = "metric") -> List[str]:

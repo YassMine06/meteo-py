@@ -22,13 +22,21 @@ def get_base64_image(image_path):
 
 # Mapping weather categories to local image paths for Base64 encoding
 WEATHER_IMAGES = {
-    "sunny": r"C:/Users/yassm/.gemini/antigravity/brain/8c98479e-7c16-4b27-bd5c-25df551512f9/sunny_weather_1767458011348.png",
-    "cloudy": r"C:/Users/yassm/.gemini/antigravity/brain/49df3cff-872b-464b-a51a-ccf08d2d9851/cloudy_weather_bg_stormy_weather_bg_1766842978272.png",
-    "rainy": r"C:/Users/yassm/.gemini/antigravity/brain/49df3cff-872b-464b-a51a-ccf08d2d9851/rainy_weather_bg_1766842963940.png",
+    "sunny_day": r"C:/Users/yassm/.gemini/antigravity/brain/8c98479e-7c16-4b27-bd5c-25df551512f9/sunny_weather_1767458011348.png",
+    "cloudy_day": r"C:/Users/yassm/.gemini/antigravity/brain/49df3cff-872b-464b-a51a-ccf08d2d9851/cloudy_weather_bg_stormy_weather_bg_1766842978272.png",
+    "rainy_day": r"C:/Users/yassm/.gemini/antigravity/brain/49df3cff-872b-464b-a51a-ccf08d2d9851/rainy_weather_bg_1766842963940.png",
+    "snowy_day": r"C:/Users/yassm/.gemini/antigravity/brain/962a10f0-879d-49f0-a847-4c42441923d2/snowy_day_background_1768336972914.png",
+    "stormy_day": r"C:/Users/yassm/.gemini/antigravity/brain/962a10f0-879d-49f0-a847-4c42441923d2/stormy_weather_day_1768336242740.png",
+    "misty_day": r"C:/Users/yassm/.gemini/antigravity/brain/962a10f0-879d-49f0-a847-4c42441923d2/misty_weather_day_1768336255667.png",
+    "clear_night": r"C:/Users/yassm/.gemini/antigravity/brain/962a10f0-879d-49f0-a847-4c42441923d2/clear_night_weather_1768336272837.png",
+    "cloudy_night": r"C:/Users/yassm/.gemini/antigravity/brain/962a10f0-879d-49f0-a847-4c42441923d2/cloudy_night_weather_1768336287659.png",
+    "snowy_night": r"C:/Users/yassm/.gemini/antigravity/brain/962a10f0-879d-49f0-a847-4c42441923d2/snowy_night_background_1768336972914.png",
+    "stormy_night": r"C:/Users/yassm/.gemini/antigravity/brain/962a10f0-879d-49f0-a847-4c42441923d2/stormy_weather_night_1768336242740.png",
+    "misty_night": r"C:/Users/yassm/.gemini/antigravity/brain/962a10f0-879d-49f0-a847-4c42441923d2/misty_weather_night_1768336255667.png",
 }
 
 
-def inject_custom_css(theme: str = 'premium', weather_category: str = 'sunny'):
+def inject_custom_css(theme: str = 'premium', weather_category: str = 'sunny_day'):
     """
     Injecter le CSS personnalisé avec glassmorphism et animations
     
@@ -39,15 +47,28 @@ def inject_custom_css(theme: str = 'premium', weather_category: str = 'sunny'):
     # Force premium theme
     theme = 'premium'
     colors = THEME_COLORS[theme]
-    gradient = WEATHER_GRADIENTS.get(weather_category, WEATHER_GRADIENTS['sunny'])
+    gradient = WEATHER_GRADIENTS.get(weather_category, WEATHER_GRADIENTS['sunny_day'])
     
     # Récupérer l'image en Base64
     image_path = WEATHER_IMAGES.get(weather_category)
+    
+    # Fallback pour les images de nuit manquantes : réutilisation des images de jour
+    is_night_fallback = False
+    if not image_path and weather_category.endswith('_night'):
+        day_category = weather_category.replace('_night', '_day')
+        image_path = WEATHER_IMAGES.get(day_category)
+        if image_path:
+            is_night_fallback = True
+            
     base64_image = get_base64_image(image_path) if image_path else None
     
     # Construction du style de fond
     if base64_image:
-        bg_style = f"url('{base64_image}') no-repeat center center fixed"
+        # Si c'est un fallback nuit, on assombrit l'image
+        if is_night_fallback:
+            bg_style = f"linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('{base64_image}') no-repeat center center fixed"
+        else:
+            bg_style = f"url('{base64_image}') no-repeat center center fixed"
     else:
         bg_style = gradient
 
@@ -202,22 +223,26 @@ def inject_custom_css(theme: str = 'premium', weather_category: str = 'sunny'):
     """, unsafe_allow_html=True)
 
 
-def create_hero_section(city_name: str, temp: float, weather_desc: str, unit: str = "°C"):
+def create_hero_section(city_name: str, temp: float, weather_desc: str, unit: str = "°C", precipitation: float = 0.0):
     """
-    Créer la section hero avec la température
+    Créer la section hero avec la température et les précipitations
     
     Args:
         city_name: Nom de la ville
         temp: Température
         weather_desc: Description météo
         unit: Unité de température
+        precipitation: Précipitations actuelles (mm)
     """
+    precip_html = f'<p style="font-size: 1.2rem; margin-top: 10px; opacity: 0.9;">💧 Précipitations: {precipitation} mm</p>' if precipitation > 0 else ""
+    
     st.markdown(f"""
     <div class="hero-container animate-fadeIn">
         <p style="font-size: 1rem; opacity: 0.8; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 10px;">MÉTÉO ACTUELLE</p>
         <h1 class="hero-title">{city_name}</h1>
         <p class="hero-temp">{round(temp)}{unit}</p>
         <p style="font-size: 1.5rem; font-weight: 400; opacity: 0.9; margin-top: 5px;">{weather_desc}</p>
+        {precip_html}
     </div>
     """, unsafe_allow_html=True)
 

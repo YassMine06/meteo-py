@@ -178,16 +178,26 @@ def create_hourly_forecast(hourly_data: Dict[str, Any], hours: int = 24, theme: 
         yaxis='y2'
     ))
     
+    # Volume de pluie
+    fig.add_trace(go.Bar(
+        x=df['Heure_Format'],
+        y=df['Précipitations'],
+        name='Précipitations (mm)',
+        marker_color='#00D4FF',
+        yaxis='y3'
+    ))
+    
     fig.update_layout(
         title='🕒 Prévisions Horaires (24h)',
         xaxis_title='Heure',
         yaxis=dict(title='Température (°C)', side='left'),
-        yaxis2=dict(title='Probabilité de pluie (%)', side='right', overlaying='y', range=[0, 100]),
+        yaxis2=dict(title='Probabilité (%)', side='right', overlaying='y', range=[0, 100], showgrid=False),
+        yaxis3=dict(title='Précipitations (mm)', side='right', overlaying='y', anchor='free', position=0.95, showgrid=False),
         template=get_chart_template(theme),
         paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor='rgba(0,0,0,0)',
         font=dict(color='white' if theme == 'dark' else 'black'),
-        margin=dict(l=20, r=20, t=50, b=20),
+        margin=dict(l=20, r=80, t=50, b=20),
         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
         hovermode='x unified'
     )
