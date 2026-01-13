@@ -150,13 +150,16 @@ def main():
         )
         
         # ONGLETS
-        tab1, tab2, tab3, tab4, tab5 = st.tabs([
+        # ONGLETS
+        tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
             "📊 Tableau de Bord",
             "🕒 Prévisions Horaires",
             "📈 Analyses",
             "📋 Données",
+            "🏙️ Comparateur",
             "💾 Export"
         ])
+
         
         # ==================== TAB 1: TABLEAU DE BORD ====================
         with tab1:
@@ -328,8 +331,95 @@ def main():
             
             st.dataframe(df_display, use_container_width=True, hide_index=True)
         
-        # ==================== TAB 5: EXPORT ====================
+        # ==================== TAB 5: COMPARATEUR ====================
         with tab5:
+            st.markdown("<h3 style='text-align: center;'>🏙️ Comparateur Multi-Villes</h3>", unsafe_allow_html=True)
+            
+            # Sélection des villes (Toutes les villes disponibles)
+            comp_options = PREDEFINED_CITIES
+            
+            # Filtre les valeurs par défaut pour s'assurer qu'elles sont dans les options
+            default_comp = [c for c in ["Casablanca", "Mohammedia"] if c in comp_options]
+            
+            cities_to_compare = st.multiselect(
+                "Sélectionnez les villes à comparer (Max 4):",
+                options=comp_options,
+                default=default_comp[:2],
+                max_selections=4
+            )
+            
+            if st.button("🚀 Lancer la comparaison", type="primary", use_container_width=True):
+                if cities_to_compare:
+                    cols = st.columns(len(cities_to_compare))
+                    
+                    scores = []
+                    
+                    for idx, city in enumerate(cities_to_compare):
+                        with cols[idx]:
+                                    # Récupération données pour chaque ville
+                            comp_api = WeatherAPI()
+                            comp_coords = comp_api.get_coordinates(city)
+                            if comp_coords:
+                                comp_data = comp_api.get_weather_data(comp_coords['lat'], comp_coords['lon'], 1, units)
+                                comp_aqi = comp_api.get_air_quality(comp_coords['lat'], comp_coords['lon'])
+                                
+                                if comp_data:
+                                    c_current = comp_data['current']
+                                    c_aqi_val = comp_aqi.get('current', {}).get('european_aqi', 0)
+                                    
+                                    # Calcul Score Confort
+                                    c_temp = c_current['temperature_2m']
+                                    c_hum = c_current['relative_humidity_2m']
+                                    c_wind = c_current['wind_speed_10m']
+                                    c_precip = c_current.get('precipitation', 0.0)
+                                    
+                                    comfort_score = analyzer.calculate_global_comfort_index(c_temp, c_hum, c_wind, c_aqi_val)
+                                    scores.append((city, comfort_score))
+                                    
+                                    # Gestion affichage pluie
+                                    precip_html = ''
+                                    if c_precip > 0:
+                                        precip_html = f"<p style='color: #4fc3f7; font-weight: bold;'>🌧️ Pluie: {c_precip} mm</p>"
+                                    else:
+                                        precip_html = "<p style='opacity: 0.6;'>☀️ Pas de pluie</p>"
+
+                                    # Affichage Carte
+                                    st.markdown(f"""
+                                    <div class="glass-card" style="text-align: center;">
+                                        <h4>{city}</h4>
+                                        <div style="font-size: 2rem; margin: 10px 0;">{analyzer.get_weather_description(c_current['weather_code']).split(' ')[0]}</div>
+                                        <p style="font-size: 1.5rem; font-weight: bold;">{c_temp} {u_temp}</p>
+                                        <hr style="opacity: 0.2;">
+                                        <div style="text-align: left; font-size: 0.9rem;">
+                                            <p>💧 Humidité: <b>{c_hum}%</b></p>
+                                            <p>💨 Vent: <b>{c_wind} {u_wind}</b></p>
+                                            <p>🍃 AQI: <b>{c_aqi_val}</b></p>
+                                            {precip_html}
+                                        </div>
+                                        <div style="margin-top: 10px; padding: 5px; background: rgba(255,255,255,0.1); border-radius: 10px;">
+                                            <small>Score Confort</small><br>
+                                            <b style="font-size: 1.2rem; color: {'#4caf50' if comfort_score > 80 else '#ff9800' if comfort_score > 50 else '#f44336'};">{comfort_score}/100</b>
+                                        </div>
+                                    </div>
+                                    """, unsafe_allow_html=True)
+
+                    # Gagnant avec Style "Recommendation Card"
+                    if scores:
+                        best_city = max(scores, key=lambda x: x[1])
+                        st.markdown(f"""
+                        <div>
+                        <h3 style="margin: 0 0 10px 0;">🏆 Verdict</h3>
+                        <div class="recommendation-card" style="margin-top: 2rem; background: rgba(30, 136, 229, 0.2); border-left: 5px solid #2196f3;">
+                            <p style="font-size: 1rem; margin: 0;">
+                                La ville la plus agréable actuellement est <b>{best_city[0]}</b> avec un score de confort de <b>{best_city[1]}/100</b>.
+                            </p>
+                        </div>
+                        </div>
+                        """, unsafe_allow_html=True)
+
+        
+        # ==================== TAB 6: EXPORT ====================
+        with tab6:
             st.markdown("<h3 style='text-align: center;'>💾 Exportation des Données</h3>", unsafe_allow_html=True)
             
             col1, col2, col3 = st.columns(3)

@@ -14,7 +14,7 @@ CACHE_TTL_AIR_QUALITY = 3600  # 1 heure
 
 # Villes prédéfinies
 PREDEFINED_CITIES = [
-    "Casablanca", "Rabat", "Marrakech", "Fès", "Tanger", "Agadir",
+    "Casablanca", "Rabat", "Marrakech", "Fès", "Tanger", "Agadir", "Mohammedia",
     "Paris", "London", "New York", "Tokyo", "Dubai", "Berlin",
     "Madrid", "Rome", "Cairo", "Istanbul", "Moscow", "Sydney",
     "Toronto", "Los Angeles", "Singapore", "Mumbai", "Beijing"

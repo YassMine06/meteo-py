@@ -1,131 +1,106 @@
-# 🌦️ Météo Pro 2.0 - Rapport Complet & Guide Détaillé
+# 🌦️ Météo Pro 2.0 - Documentation Technique
 
-## 📖 Introduction : Qu'est-ce que ce projet ?
+## 📋 Résumé Exécutif
 
-Bienvenue sur **Météo Pro 2.0**. Ce projet n'est pas simplement une page web qui affiche la température ; c'est une application interactive complète, construite entièrement en langage **Python**.
+**Météo Pro 2.0** est une application de tableau de bord météorologique avancée, conçue en Python avec le framework Streamlit. Elle délivre des prévisions météorologiques de haute précision intégrées dans une interface utilisateur réactive et immersive, basée sur les principes du Glassmorphism.
 
-L'objectif était de créer une interface météo qui soit aussi belle que fonctionnelle, capable de rivaliser avec les applications professionnelles que vous trouvez sur votre smartphone. Nous avons mis l'accent sur **l'expérience visuelle** : l'application "ressent" la météo et change d'apparence pour vous immerger dans l'ambiance actuelle (pluie, soleil, nuit étoilée, etc.).
-
----
-
-## 🎨 L'Expérience Visuelle (Ce qu'on voit)
-
-Nous avons utilisé une technique de design moderne appelée **"Glassmorphism"**.
-
-- **C'est quoi ?** Imaginez des panneaux de verre dépoli flottant sur une image de fond. Cela donne un aspect transparent, léger et très élégant.
-- **Pourquoi ?** Pour que les informations (texte, chiffres) soient parfaitement lisibles tout en laissant voir la magnifique image d'arrière-plan.
-
-### 🖼️ Les Fonds d'Écran Intelligents
-
-L'application est "vivante". Elle ne se contente pas d'afficher un soleil quand il fait beau. Elle analyse deux choses :
-
-1.  **La Météo** : La pluie, la neige, l'orage, le brouillard...
-2.  **Le Moment de la Journée** : Jour ou Nuit.
-
-**Exemple concret :**
-
-- S'il fait beau à midi : Vous verrez un **ciel bleu éclatant**.
-- S'il fait beau à minuit : Vous verrez un **ciel nocturne étoilé**.
-- S'il y a du brouillard la nuit : Vous verrez une **rue mystérieuse éclairée par des lampadaires**.
-
-> **Note :** Si jamais une image spécifique manque, l'application est assez maligne pour prendre l'image de jour et l'assombrir artificiellement pour créer une ambiance de nuit convaincante.
+Les différenciateurs techniques clés incluent un moteur de rendu atmosphérique contextuel (arrière-plans dynamiques basés sur les codes WMO et les cycles diurnes) et une architecture robuste de repli pour la disponibilité des ressources graphiques.
 
 ---
 
-## ⚙️ La Mécanique (Comment ça marche ?)
+## 🏗️ Architecture du Système
 
-Pour qu'une application fonctionne, c'est comme une voiture : il y a plusieurs pièces, et chacune a un rôle précis. Voici le détail de chaque fichier de notre projet, expliqué simplement :
+L'application suit une **Architecture Basée sur les Composants**, assurant une séparation des préoccupations entre l'acquisition des données, la logique de traitement et le rendu de l'interface utilisateur.
 
-### 1. Le Chef d'Orchestre : `app.py`
+### Modules Clés
 
-C'est le fichier principal. Quand vous lancez l'application, c'est lui qui démarre.
-
-- **Son rôle** : Il dirige tout le monde. Il demande à l'API la météo, il choisit quelle image afficher, et il dessine la page (titres, colonnes, boutons).
-- _Analogie_ : C'est le réalisateur du film.
-
-### 2. Le Messager : `weather_api.py`
-
-Ce fichier est chargé d'aller chercher les informations à l'extérieur.
-
-- **Son rôle** : Il se connecte à Internet (vers le service "Open-Meteo") pour demander : "Quel temps fait-il à Paris ?". Il reçoit la réponse (des chiffres) et la rapporte au Chef d'Orchestre.
-- _Analogie_ : C'est le facteur qui va chercher votre courrier.
-
-### 3. Le Traducteur : `weather_analyzer.py`
-
-Les ordinateurs parlent en chiffres (ex: Code météo "45"). Les humains préfèrent les mots (ex: "Brouillard").
-
-- **Son rôle** : Il traduit les codes compliqués en phrases simples. Il calcule aussi si c'est confortable (Indice de chaleur) ou s'il faut mettre un manteau.
-- _Analogie_ : C'est un interprète qui traduit un langage technique en français courant.
-
-### 4. Le Décorateur : `ui_components.py`
-
-C'est lui qui gère la beauté de l'application.
-
-- **Son rôle** : Il contient les instructions pour les couleurs, les styles de texte, et surtout, c'est lui qui décide quelle image de fond correspond à la météo actuelle. Il gère aussi le fameux effet de "verre dépoli".
-- _Analogie_ : C'est l'architecte d'intérieur.
-
-### 5. Le Livre de Règles : `config.py`
-
-Ce fichier contient toutes les listes fixes.
-
-- **Son rôle** : Il stocke la liste des villes (Paris, Londres...), les codes couleurs, et les traductions officielles des codes météo.
-- _Analogie_ : C'est le dictionnaire ou le manuel de référence.
+| Module                | Classification                       | Responsabilité                                                                                                                                                                                 |
+| :-------------------- | :----------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `app.py`              | **Contrôleur / Point d'Entrée**      | Orchestre le cycle de vie de l'application, la gestion de l'état de session (`st.session_state`) et l'injection des composants.                                                                |
+| `weather_analyzer.py` | **Couche Logique Métier**            | Implémente les algorithmes d'interprétation des codes WMO, la génération des indices de confort (Heat Index/Wind Chill) et l'analyse des tendances de données.                                 |
+| `weather_api.py`      | **Couche d'Accès aux Données (DAL)** | Gère la communication synchrone avec les endpoints REST d'Open-Meteo. Implémente des stratégies de mise en cache (`@st.cache_data`) pour optimiser l'utilisation des quotas API et la latence. |
+| `ui_components.py`    | **Vue / Couche de Présentation**     | Gère l'injection CSS, l'encodage des actifs en Base64 et le rendu des éléments UI atomiques (Cartes, Métriques). Implémente la logique d'arrière-plan dynamique.                               |
+| `config.py`           | **Configuration**                    | Centralise la configuration statique, le proxy des variables d'environnement (si applicable) et les constantes mappées (Codes Météo, Palettes de Couleurs).                                    |
 
 ---
 
-## 🚀 Guide d'Installation (Pas à pas pour débutant)
+## 💻 Stack Technique
 
-Vous voulez lancer ce projet sur votre ordinateur ? Suivez ces étapes simples.
+- **Environnement d'Exécution** : Python 3.8+
+- **Framework Frontend** : [Streamlit](https://streamlit.io/) (Reactive Web Framework)
+- **Traitement de Données** :
+  - **Pandas** : Manipulation de séries temporelles et structuration de dataframes.
+  - **NumPy** : Opérations vectorisées pour l'analyse statistique.
+  - **Plotly Express** : Moteur de visualisation de données interactif.
+- **APIs Externes** :
+  - [Open-Meteo](https://open-meteo.com/) : API de Prévisions Météo (Sans Auth, Haute Disponibilité).
+  - Geocoding API : Résolution de coordonnées spatiales.
+  - Air Quality API : Données AQI et concentration de polluants.
 
-### Étape 1 : Préparer le terrain
+---
 
-Assurez-vous d'avoir **Python** installé sur votre ordinateur. C'est le moteur qui fait tourner le code.
+## ⚙️ Implémentations Techniques Clés
 
-### Étape 2 : Récupérer les "ingrédients"
+### 1. Moteur de Rendu d'Arrière-plan Contextuel
 
-Les développeurs utilisent des bibliothèques (des morceaux de code déjà faits par d'autres) pour gagner du temps. La liste de ces ingrédients est dans le fichier `requirements.txt`.
+L'interface s'adapte dynamiquement aux conditions environnementales via un pipeline logique personnalisé :
 
-Ouvrez votre terminal (l'écran noir où on tape des commandes) et écrivez ceci :
+1.  **Extraction d'État** : Récupère le `weather_code` (standards WMO) et le booléen `is_day` depuis la payload API.
+2.  **Mappage de Catégorie** : `WeatherAnalyzer.get_weather_category(code, is_day)` résout les états internes précis (ex: `misty_night` vs `misty_day`).
+3.  **Résolution d'Actifs** :
+    - **Primaire** : Vérifie le chemin de l'actif haute résolution mappé.
+    - **Stratégie de Repli (Heuristique)** : Si un actif nocturne spécifique est manquant (ex: `misty_night`), le système charge l'actif diurne correspondant (`misty_day`) et applique un **filtre de luminosité CSS** (overlay sombre) pour simuler les conditions nocturnes, assurant la continuité visuelle.
+    - **Sécurité** : Retourne aux gradients linéaires CSS si aucun actif n'est résoluble.
+
+### 2. Stylisation Isomorphique (Glassmorphism)
+
+L'application surcharge les classes CSS standard de Streamlit via `st.markdown(unsafe_allow_html=True)` pour implémenter un langage de design Glassmorphism cohérent :
+
+- **Backdrop Filter** : `blur(10px)`
+- **Translucidité** : `rgba(255, 255, 255, 0.1)`
+- **Bordure** : `1px solid rgba(255, 255, 255, 0.2)`
+
+### 3. Outillage Développeur (Mode Test Visuel)
+
+Pour faciliter le débogage de l'interface sans dépendre des variations API en temps réel, un **Harnais de Test Visuel** est intégré dans `app.py`.
+
+- **Mécanisme** : Permet l'injection d'états météo simulés directement dans le pipeline de rendu, contournant la réponse API.
+- **Utilisation** : Accessible via Sidebar -> "Mode Test". L'activation surcharge la `weather_category` dérivée des données réelles.
+
+---
+
+## 🚀 Déploiement & Installation
+
+### Prérequis
+
+- Environnement Python (Virtualenv/Conda recommandé)
+- Git
+
+### Routine d'Installation
 
 ```bash
+# 1. Cloner le Dépôt
+git clone <url_du_depot>
+cd meteo-py
+
+# 2. Résolution des Dépendances
 pip install -r requirements.txt
-```
 
-_Cela veut dire : "Python, s'il te plaît (pip), installe tous les outils listés dans le fichier requirements.txt"._
-
-### Étape 3 : Démarrer le moteur
-
-Une fois que tout est installé, lancez l'application avec cette commande :
-
-```bash
+# 3. Exécution
 streamlit run app.py
 ```
 
-_Cela veut dire : "Streamlit (notre outil d'affichage), exécute le fichier principal app.py"._
+### Configuration
 
-🎉 **Magie !** Votre navigateur internet va s'ouvrir tout seul avec l'application météo.
+Les paramètres du projet peuvent être ajustés dans `config.py`.
 
----
-
-## 🛠️ Le "Mode Test" (Secret de fabrication)
-
-Nous avons ajouté une fonctionnalité cachée pour les créateurs : le **Mode Test Visuel**.
-Dans la barre latérale de gauche, il y a une option "Mode Test". Si vous l'activez, vous pouvez **forcer** l'application à afficher n'importe quelle météo (Orage, Neige, Soleil...).
-
-- **À quoi ça sert ?** Cela permet de vérifier que toutes les images et les couleurs fonctionnent bien, sans attendre qu'il neige vraiment dehors !
+- `CACHE_TTL_WEATHER` : Ajuste la fréquence de polling API (Défaut : 900s).
+- `THEME_COLORS` : Définition du schéma de couleurs de l'application.
 
 ---
 
-## 📝 Conclusion
+## 📄 Licence & Crédits
 
-Ce projet montre comment on peut partir de simples lignes de code pour arriver à un outil visuel, utile et agréable. Il combine :
-
-- De la **Logique** (Python)
-- De la **Donnée** (API Météo)
-- Du **Design** (CSS & Images)
-
-C'est un exemple parfait de ce qu'est "l'informatique créative".
-
-**Auteur :** Yassmine
-**Cours :** Compétences numériques et informatique (Python)
-**Année :** 2026
+Développé dans le cadre du cursus **"Compétences numériques et informatique (Python)"**.
+**Version** : 2.0.0-stable
+**Date de Build** : Janvier 2026

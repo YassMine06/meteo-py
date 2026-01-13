@@ -153,25 +153,29 @@ def inject_custom_css(theme: str = 'premium', weather_category: str = 'sunny_day
 
         /* Tabs Stylisés */
         .stTabs [data-baseweb="tab-list"] {{
-            gap: 20px;
+            gap: 8px;
             background-color: rgba(255, 255, 255, 0.25);
             backdrop-filter: blur(40px);
             -webkit-backdrop-filter: blur(40px);
-            padding: 15px;
+            padding: 10px 15px;
             border-radius: 50px;
             border: 1px solid rgba(255, 255, 255, 0.3);
             margin-bottom: 6rem;
             justify-content: center;
+            flex-wrap: wrap;
         }}
 
         .stTabs [data-baseweb="tab"] {{
-            height: 50px;
-            padding: 0 30px !important;
+            height: 45px;
+            padding: 0 15px !important;
             background-color: transparent !important;
             border: none !important;
             color: rgba(255, 255, 255, 0.8) !important;
             font-weight: 500 !important;
             border-radius: 25px !important;
+            font-size: 0.9rem;
+            flex-grow: 1;
+            max-width: fit-content;
         }}
 
         .stTabs [aria-selected="true"] {{

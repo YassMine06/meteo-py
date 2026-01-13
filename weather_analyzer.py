@@ -60,6 +60,44 @@ class WeatherAnalyzer:
         return temp
     
     @staticmethod
+    def calculate_global_comfort_index(temp: float, humidity: float, wind_speed: float, aqi: float = 0) -> float:
+        """
+        Calculer un score global de confort (0-100)
+        
+        Args:
+            temp: Température (°C)
+            humidity: Humidité (%)
+            wind_speed: Vent (km/h)
+            aqi: Qualité de l'air
+            
+        Returns:
+            Score sur 100 (100 = Parfait)
+        """
+        score = 100.0
+        
+        # Pénalité Température (Idéal entre 18 et 25)
+        if temp < 18:
+            score -= (18 - temp) * 2
+        elif temp > 25:
+            score -= (temp - 25) * 2.5
+            
+        # Pénalité Humidité (Idéal entre 40 et 60)
+        if humidity < 40:
+            score -= (40 - humidity) * 0.5
+        elif humidity > 60:
+            score -= (humidity - 60) * 0.5
+            
+        # Pénalité Vent
+        if wind_speed > 20:
+            score -= (wind_speed - 20) * 0.5
+            
+        # Pénalité AQI
+        if aqi > 50:
+            score -= (aqi - 50) * 0.5
+            
+        return max(0.0, min(100.0, round(score, 1)))
+
+    @staticmethod
     def get_aqi_description(aqi_value: float) -> str:
         """
         Interpréter l'indice AQI (European)
