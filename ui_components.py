@@ -23,7 +23,7 @@ def get_base64_image(image_path):
 # Mapping weather categories to local image paths for Base64 encoding
 WEATHER_IMAGES = {
     "sunny_day": r"C:/Users/yassm/.gemini/antigravity/brain/8c98479e-7c16-4b27-bd5c-25df551512f9/sunny_weather_1767458011348.png",
-    "cloudy_day": r"C:/Users/yassm/.gemini/antigravity/brain/49df3cff-872b-464b-a51a-ccf08d2d9851/cloudy_weather_bg_stormy_weather_bg_1766842978272.png",
+    "cloudy_day": r"C:/Users/yassm/.gemini/antigravity/brain/8c98479e-7c16-4b27-bd5c-25df551512f9/cloudy_weather_1767458030393.png",
     "rainy_day": r"C:/Users/yassm/.gemini/antigravity/brain/49df3cff-872b-464b-a51a-ccf08d2d9851/rainy_weather_bg_1766842963940.png",
     "snowy_day": r"C:/Users/yassm/.gemini/antigravity/brain/962a10f0-879d-49f0-a847-4c42441923d2/snowy_day_background_1768336972914.png",
     "stormy_day": r"C:/Users/yassm/.gemini/antigravity/brain/962a10f0-879d-49f0-a847-4c42441923d2/stormy_weather_day_1768336242740.png",
