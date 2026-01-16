@@ -22,18 +22,19 @@ def get_base64_image(image_path):
 
 # Mapping weather categories to local image paths for Base64 encoding
 WEATHER_IMAGES = {
-    "sunny_day": r"C:/Users/yassm/.gemini/antigravity/brain/8c98479e-7c16-4b27-bd5c-25df551512f9/sunny_weather_1767458011348.png",
-    "cloudy_day": r"C:/Users/yassm/.gemini/antigravity/brain/8c98479e-7c16-4b27-bd5c-25df551512f9/cloudy_weather_1767458030393.png",
-    "rainy_day": r"C:/Users/yassm/.gemini/antigravity/brain/49df3cff-872b-464b-a51a-ccf08d2d9851/rainy_weather_bg_1766842963940.png",
-    "snowy_day": r"C:/Users/yassm/.gemini/antigravity/brain/962a10f0-879d-49f0-a847-4c42441923d2/snowy_day_background_1768336972914.png",
-    "stormy_day": r"C:/Users/yassm/.gemini/antigravity/brain/962a10f0-879d-49f0-a847-4c42441923d2/stormy_weather_day_1768336242740.png",
-    "misty_day": r"C:/Users/yassm/.gemini/antigravity/brain/962a10f0-879d-49f0-a847-4c42441923d2/misty_weather_day_1768336255667.png",
-    "clear_night": r"C:/Users/yassm/.gemini/antigravity/brain/962a10f0-879d-49f0-a847-4c42441923d2/clear_night_weather_1768336272837.png",
-    "cloudy_night": r"C:/Users/yassm/.gemini/antigravity/brain/962a10f0-879d-49f0-a847-4c42441923d2/cloudy_night_weather_1768336287659.png",
-    "snowy_night": r"C:/Users/yassm/.gemini/antigravity/brain/962a10f0-879d-49f0-a847-4c42441923d2/snowy_night_background_1768336972914.png",
-    "stormy_night": r"C:/Users/yassm/.gemini/antigravity/brain/962a10f0-879d-49f0-a847-4c42441923d2/stormy_weather_night_1768336242740.png",
-    "misty_night": r"C:/Users/yassm/.gemini/antigravity/brain/962a10f0-879d-49f0-a847-4c42441923d2/misty_weather_night_1768336255667.png",
+    "sunny_day": "image/sunny_weather_1767458011348.png",
+    "cloudy_day": "image/cloudy_weather_1767458030393.png",
+    "rainy_day": "image/rainy_weather_bg_1766842963940.png",
+    "snowy_day": "image/snowy_day_background_1768336972914.png",
+    "stormy_day": "image/stormy_weather_day_1768336242740.png",
+    "misty_day": "image/misty_weather_day_1768336255667.png",
+    "clear_night": "image/clear_night_weather_1768336272837.png",
+    "cloudy_night": "image/cloudy_night_weather_1768336287659.png",
+    "snowy_night": "image/snowy_night_background_1768336972914.png",
+    "stormy_night": "image/stormy_weather_night_1768336242740.png",
+    "misty_night": "image/misty_weather_night_1768336255667.png",
 }
+
 
 
 def inject_custom_css(theme: str = 'premium', weather_category: str = 'sunny_day'):
