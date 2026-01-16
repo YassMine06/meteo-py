@@ -79,16 +79,16 @@ def main():
         
         st.divider()
         
-        # # Mode Test (Debug)
-        # st.markdown("### 🔧 Mode Test")
-        # test_mode = st.checkbox("Activer test visuel", value=False, help="Permet de tester manuellement chaque arrière-plan")
-        # selected_test_category = "sunny_day"
-        # if test_mode:
-        #     from config import WEATHER_GRADIENTS
-        #     selected_test_category = st.selectbox(
-        #         "Choisir un scénario:",
-        #         options=list(WEATHER_GRADIENTS.keys())
-        #     )
+        # Mode Test (Debug)
+        st.markdown("### 🔧 Mode Test")
+        test_mode = st.checkbox("Activer test visuel", value=False, help="Permet de tester manuellement chaque arrière-plan")
+        selected_test_category = "sunny_day"
+        if test_mode:
+            from config import WEATHER_GRADIENTS
+            selected_test_category = st.selectbox(
+                "Choisir un scénario:",
+                options=list(WEATHER_GRADIENTS.keys())
+            )
         
         rechercher = st.button("🔍 RECHERCHER", type="primary", use_container_width=True)
 
@@ -102,8 +102,8 @@ def main():
         weather_category = analyzer.get_weather_category(code, is_day)
     
     # Override weather category if test mode is enabled
-    # if test_mode:
-    #     weather_category = selected_test_category
+    if test_mode:
+        weather_category = selected_test_category
     
     # Injection du CSS
     inject_custom_css(theme, weather_category)
@@ -377,9 +377,12 @@ def main():
                                     scores.append((city, comfort_score))
                                     
                                     # Gestion affichage pluie
-                                    precip_html = ''
-                                    if c_precip > 0:
-                                        precip_html = f"<p style='color: #4fc3f7; font-weight: bold;'>🌧️ Pluie: {c_precip} mm</p>"
+                                    weather_cat = analyzer.get_weather_category(c_current['weather_code'])
+                                    is_rainy = "rainy" in weather_cat or "stormy" in weather_cat or c_precip > 0
+
+                                    if is_rainy:
+                                        label = "🌧️ Pluie" if "rainy" in weather_cat else "⛈️ Orage" if "stormy" in weather_cat else "💧 Précip."
+                                        precip_html = f"<p style='color: #4fc3f7; font-weight: bold;'>{label}: {c_precip} mm</p>"
                                     else:
                                         precip_html = "<p style='opacity: 0.6;'>☀️ Pas de pluie</p>"
 
